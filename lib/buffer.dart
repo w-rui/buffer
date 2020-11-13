@@ -171,6 +171,15 @@ class ByteDataWriter {
 
   ByteDataWriter({this.bufferLength = 128, this.endian = Endian.big});
 
+  int get offsetInBytes => _offset + _bb.length;
+
+  Uint8List getBytes(int offs, int len) {
+    if (_bb.length > 0)
+      return toBytes().sublist(offs, len);
+    else
+      return _data.buffer.asUint8List(offs, len);
+  }
+
   void _flush() {
     if (_data != null) {
       if (_offset > 0) {
@@ -323,6 +332,13 @@ class ByteDataReader {
 
   /// The offset in bytes (the current position).
   int get offsetInBytes => _queueTotalLength - remainingLength;
+
+  Uint8List getBytes(int offs, int len) {
+    if (_queueTotalLength != _queueCurrentLength)
+      throw UnsupportedError('only support getBytes() from single item queue.');
+
+    return _data.buffer.asUint8List(offs, len);
+  }
 
   void _clearQueue() {
     while (_queue.isNotEmpty && _queue.first.length == _offset) {
